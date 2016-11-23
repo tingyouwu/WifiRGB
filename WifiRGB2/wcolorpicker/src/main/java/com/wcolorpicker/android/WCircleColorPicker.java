@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,72 +16,40 @@ import android.view.View;
 
 /**
  * 选择颜色值的调色板。
- *
  * @author wuzhen
- * @version Version 1.0, 2016-09-18
  */
 public class WCircleColorPicker extends View {
-
-    private static final float DEFAULT_POINTER_WIDTH_DP = 1f;
-    private static final float DEFAULT_POINTER_LENGTH_DP = 12f;
 
     //把HSV的内容转化成color,其中alpha设置成0xff,hsv有三个成员，hsv[0]的范围是[0,360),表示色彩，hsv[1]范围[0,1]表示饱和度，
     // hsv[2]范围[0,1]表示值，如果它们的值超出范围，那么它们会被截断成范围内的值
     private final float[] colorHsv = {0f, 0f, 1f};
 
-    private int mPointerLength;
-
-    private int innerPadding;
-    private int lastSelectedColor;
-    private float circleRadius;
-    private float innerCircleRadius;
+    private int innerPadding = 0;
+    private int lastSelectedColor;//最近选择的颜色
+    private float circleRadius;//圆半径
     private int[] pixels;
 
     private Rect rect;
     private Bitmap bitmap;
 
-    private Paint mPointerPaint = new Paint();
     private Paint mCirclePaint = new Paint();
-    private PointF mSelectedPoint = new PointF();
 
     private IOnColorSelectedListener mOnColorSelectedListener;
 
     public WCircleColorPicker(Context context) {
         super(context);
-
-        init(context, null, 0);
+        init();
     }
 
     public WCircleColorPicker(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        init(context, attrs, 0);
+        init();
     }
 
-    public WCircleColorPicker(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-
-        init(context, attrs, defStyleAttr);
-    }
-
-    private void init(Context context, AttributeSet attrs, int defStyleAttr) {
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.WCircleColorPicker, defStyleAttr, 0);
-        mPointerLength = a.getDimensionPixelOffset(R.styleable.WCircleColorPicker_wcp_pointerLength,
-                dp2px(DEFAULT_POINTER_LENGTH_DP));
-        int pointerWidth = a.getDimensionPixelOffset(R.styleable.WCircleColorPicker_wcp_pointerWidth,
-                dp2px(DEFAULT_POINTER_WIDTH_DP));
-        int pointerColor = a.getColor(R.styleable.WCircleColorPicker_wcp_pointerColor, Color.BLACK);
-        a.recycle();
-
-        mPointerPaint.setColor(pointerColor);
-        mPointerPaint.setStrokeWidth(pointerWidth);
-
-        innerPadding = mPointerLength / 2;
-
+    private void init() {
         mCirclePaint.setStyle(Paint.Style.STROKE);
         mCirclePaint.setStrokeWidth(3);
         mCirclePaint.setAntiAlias(true);
-
         setColor(Color.HSVToColor(colorHsv));
     }
 
@@ -114,27 +81,13 @@ public class WCircleColorPicker extends View {
     protected void onDraw(Canvas canvas) {
         if (bitmap != null) {
             canvas.drawBitmap(bitmap, null, rect, null);
-
             // TODO 防止边缘锯齿的更好方法
             Drawable drawable = getBackground();
             if (drawable instanceof ColorDrawable) {
-                innerCircleRadius = circleRadius - 2;
                 int color = ((ColorDrawable) drawable).getColor();
                 mCirclePaint.setColor(color);
                 canvas.drawCircle(getWidth() / 2.f, getHeight() / 2.f, getWidth() / 2.f - innerPadding - 1, mCirclePaint); //画出圆环
             }
-
-            float hueInPiInterval = colorHsv[0] / 180f * (float) Math.PI;
-
-            mSelectedPoint.x = (float) (rect.left + (-Math.cos(hueInPiInterval) * colorHsv[1] *
-                    innerCircleRadius + circleRadius));
-            mSelectedPoint.y = (float) (rect.top + (-Math.sin(hueInPiInterval) * colorHsv[1] *
-                    innerCircleRadius + circleRadius));
-
-            canvas.drawLine(mSelectedPoint.x - mPointerLength / 2.f, mSelectedPoint.y,
-                    mSelectedPoint.x + mPointerLength / 2.f, mSelectedPoint.y, mPointerPaint);
-            canvas.drawLine(mSelectedPoint.x, mSelectedPoint.y - mPointerLength / 2.f,
-                    mSelectedPoint.x, mSelectedPoint.y + mPointerLength / 2.f, mPointerPaint);
         }
     }
 
@@ -145,10 +98,7 @@ public class WCircleColorPicker extends View {
         rect = new Rect(innerPadding, innerPadding, w - innerPadding, h - innerPadding);
         bitmap = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888);
         circleRadius = Math.min(rect.width(), rect.height()) / 2;
-        innerCircleRadius = circleRadius;
-
         pixels = new int[rect.width() * rect.height()];
-
         createBitmap();
     }
 
@@ -204,12 +154,14 @@ public class WCircleColorPicker extends View {
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
-            int newColor = getColorForPoint((int) event.getX(), (int) event.getY(), colorHsv);
-            if (mOnColorSelectedListener != null) {
-                mOnColorSelectedListener.onColorSelected(newColor, lastSelectedColor);
+
+            if(!isOutOfCircle((int) event.getX(),(int) event.getY())){
+                int newColor = getColorForPoint((int) event.getX(), (int) event.getY(), colorHsv);
+                if (mOnColorSelectedListener != null) {
+                    mOnColorSelectedListener.onColorSelected(newColor, lastSelectedColor);
+                }
+                lastSelectedColor = newColor;
             }
-            lastSelectedColor = newColor;
-            invalidate();
             return true;
         }
         return super.onTouchEvent(event);
@@ -219,13 +171,18 @@ public class WCircleColorPicker extends View {
         x -= circleRadius;
         y -= circleRadius;
         double centerDist = Math.sqrt(x * x + y * y);
+        //色彩
         hsv[0] = (float) (Math.atan2(y, x) / Math.PI * 180f) + 180;
         hsv[1] = Math.max(0f, Math.min(1f, (float) (centerDist / circleRadius)));
         return Color.HSVToColor(255, hsv);
     }
 
-    private int dp2px(float dpValue) {
-        float density = getResources().getDisplayMetrics().density;
-        return (int) (density * dpValue + 0.5f);
+    private boolean isOutOfCircle(int x, int y){
+        x -= circleRadius;
+        y -= circleRadius;
+        double centerDist = Math.sqrt(x * x + y * y);
+        if(centerDist>circleRadius)
+            return true;
+        return false;
     }
 }
