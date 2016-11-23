@@ -1,13 +1,18 @@
-package com.wty.app.wifirgb;
+package com.wty.app.wifirgb.activity;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.wcolorpicker.android.IOnColorSelectedListener;
 import com.wcolorpicker.android.WCircleColorPicker;
+import com.wty.app.wifirgb.R;
 
 public class MainActivity extends AppCompatActivity implements IOnColorSelectedListener{
+
+    public static final String BLUETOOTH_ADDRESS = "address";
 
     View viewColorNew;
     View viewColorOld;
@@ -29,5 +34,11 @@ public class MainActivity extends AppCompatActivity implements IOnColorSelectedL
     public void onColorSelected(int newColor, int oldColor) {
         viewColorNew.setBackgroundColor(newColor);
         viewColorOld.setBackgroundColor(oldColor);
+    }
+
+    public static void startMainActivity(Context context,String address){
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.putExtra(BLUETOOTH_ADDRESS,address);
+        context.startActivity(intent);
     }
 }
