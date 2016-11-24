@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -35,6 +36,8 @@ public class WCircleColorPicker extends View {
     private Paint mCirclePaint = new Paint();
 
     private IOnColorSelectedListener mOnColorSelectedListener;
+
+    private IOnColorChangeListener mOnColorChangeListener;
 
     public WCircleColorPicker(Context context) {
         super(context);
@@ -75,6 +78,15 @@ public class WCircleColorPicker extends View {
      */
     public void setOnColorSelectedListener(IOnColorSelectedListener listener) {
         this.mOnColorSelectedListener = listener;
+    }
+
+    /**
+     * 设置颜色选中的监听事件。
+     *
+     * @param listener 监听事件
+     */
+    public void setOnColorChangedListener(IOnColorChangeListener listener) {
+        this.mOnColorChangeListener = listener;
     }
 
     @Override
@@ -160,6 +172,13 @@ public class WCircleColorPicker extends View {
                 if (mOnColorSelectedListener != null) {
                     mOnColorSelectedListener.onColorSelected(newColor, lastSelectedColor);
                 }
+
+                if (mOnColorChangeListener != null){
+                    int red = getRed(newColor);
+                    int green = getGreen(newColor);
+                    int blue = getBlue(newColor);
+                    mOnColorChangeListener.onColorSelected(red,green,blue);
+                }
                 lastSelectedColor = newColor;
             }
             return true;
@@ -184,5 +203,17 @@ public class WCircleColorPicker extends View {
         if(centerDist>circleRadius)
             return true;
         return false;
+    }
+
+    private int getBlue(int color){
+        return Color.blue(color);
+    }
+
+    private int getRed(int color){
+        return Color.red(color);
+    }
+
+    private int getGreen(int color){
+        return Color.green(color);
     }
 }

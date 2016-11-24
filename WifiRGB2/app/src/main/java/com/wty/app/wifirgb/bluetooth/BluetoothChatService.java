@@ -4,11 +4,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
+
+import com.wty.app.wifirgb.event.BluetoothEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,8 +28,7 @@ public class BluetoothChatService {
 
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
-    private final BluetoothAdapter mAdapter;
-    private final Handler mHandler;
+    private BluetoothAdapter mAdapter;
     private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
@@ -47,17 +46,26 @@ public class BluetoothChatService {
     public static final int MESSAGE_TOAST = 5;
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
+    public static final String STATE = "state";
+    public static final String DATA = "data";
 
-    public BluetoothChatService(Context context, Handler handler) {
+    private static volatile BluetoothChatService instance = new BluetoothChatService();
+
+    public static BluetoothChatService getInstance(){
+        return instance;
+    }
+
+    private BluetoothChatService() {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
-        mHandler = handler;
     }
 
     private synchronized void setState(int state) {
         if (D) Log.d(TAG, "setState() " + mState + " -> " + state);
         mState = state;
-        mHandler.obtainMessage(MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        BluetoothEvent event = new BluetoothEvent(MESSAGE_STATE_CHANGE);
+        event.appendHashParam(STATE,state);
+        EventBus.getDefault().post(event);
     }
 
     /**
@@ -116,11 +124,9 @@ public class BluetoothChatService {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(MESSAGE_DEVICE_NAME);
-        Bundle bundle = new Bundle();
-        bundle.putString(DEVICE_NAME, device.getName());
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        BluetoothEvent event = new BluetoothEvent(MESSAGE_DEVICE_NAME);
+        event.appendHashParam(DEVICE_NAME,device.getName());
+        EventBus.getDefault().post(event);
 
         setState(STATE_CONNECTED);
     }
@@ -159,11 +165,9 @@ public class BluetoothChatService {
     private void connectionFailed() {
         setState(STATE_LISTEN);
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
-        bundle.putString(TOAST, "该蓝牙设备无法连接");
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        BluetoothEvent event = new BluetoothEvent(MESSAGE_TOAST);
+        event.appendHashParam(TOAST,"无法连接该蓝牙台灯");
+        EventBus.getDefault().post(event);
     }
 
     /**
@@ -172,11 +176,9 @@ public class BluetoothChatService {
     private void connectionLost() {
         setState(STATE_LISTEN);
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
-        bundle.putString(TOAST, "该蓝牙设备已经断开");
-        msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        BluetoothEvent event = new BluetoothEvent(MESSAGE_TOAST);
+        event.appendHashParam(TOAST,"该蓝牙台灯已经断开");
+        EventBus.getDefault().post(event);
     }
 
     /**
@@ -349,9 +351,11 @@ public class BluetoothChatService {
                     // 读取输入流
                     bytes = mmInStream.read(buffer);
                     Log.d(TAG, "wutingyou 收到数据");
-                    if(bytes>0)
-                        mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
-                                .sendToTarget();
+                    if(bytes>0){
+                        BluetoothEvent event = new BluetoothEvent(MESSAGE_READ);
+                        event.appendHashParam(DATA,buffer);
+                        EventBus.getDefault().post(event);
+                    }
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
@@ -368,8 +372,9 @@ public class BluetoothChatService {
             try {
                 mmOutStream.write(buffer);
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(MESSAGE_WRITE, -1, -1, buffer)
-                        .sendToTarget();
+                BluetoothEvent event = new BluetoothEvent(MESSAGE_WRITE);
+                event.appendHashParam(DATA,buffer);
+                EventBus.getDefault().post(event);
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }
