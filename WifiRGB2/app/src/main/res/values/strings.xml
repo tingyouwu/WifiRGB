@@ -2,7 +2,7 @@
     <string name="app_name">U台灯</string>
     <!--  BluetoothChat -->
     <string name="send">Send</string>
-    <string name="not_connected">尚未连接蓝牙设备</string>
+    <string name="not_connected">尚未连接蓝牙设备,请返回上一个页面连接</string>
     <string name="bt_not_enabled_leaving">蓝牙不可用，请重试！</string>
     <string name="bt_enabled_success">成功打开蓝牙，请点击连接蓝牙台灯</string>
     <string name="title_connecting">连接中...</string>

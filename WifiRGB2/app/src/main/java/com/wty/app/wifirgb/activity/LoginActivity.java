@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +36,11 @@ public class LoginActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 2;
 
     Button btn_connect;
+
+    public static void startLoginActivity(Context context){
+        Intent intent = new Intent(context, LoginActivity.class);
+        context.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,13 +92,12 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "连接上 "
                         + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
                 MainActivity.startMainActivity(LoginActivity.this);
+                finish();
                 break;
 
             case BluetoothChatService.MESSAGE_TOAST:
                 Toast.makeText(getApplicationContext(), event.getHashMap().get(BluetoothChatService.TOAST).toString(),
                         Toast.LENGTH_SHORT).show();
-                MainActivity.startMainActivity(LoginActivity.this);
-                finish();
                 break;
 
             default:

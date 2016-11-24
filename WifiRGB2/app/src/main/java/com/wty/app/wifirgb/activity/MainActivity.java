@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.Toast;
 
 import com.wcolorpicker.android.IOnColorChangeListener;
@@ -42,9 +43,6 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //关闭蓝牙
-        if(BluetoothAdapter.getDefaultAdapter().isEnabled())
-            BluetoothAdapter.getDefaultAdapter().disable();
         EventBus.getDefault().unregister(this);
     }
 
@@ -77,6 +75,26 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
     public static void startMainActivity(Context context){
         Intent intent = new Intent(context, MainActivity.class);
         context.startActivity(intent);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        super.onKeyDown(keyCode, event);
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                if (BluetoothChatService.getInstance().getState() != BluetoothChatService.STATE_CONNECTED) {
+                    LoginActivity.startLoginActivity(MainActivity.this);
+                }else {
+                    //关闭蓝牙
+                    if(BluetoothAdapter.getDefaultAdapter().isEnabled())
+                        BluetoothAdapter.getDefaultAdapter().disable();
+                }
+                finish();
+                break;
+            default:
+                return super.onKeyDown(keyCode, event);
+        }
+        return false;
     }
 
     /**
