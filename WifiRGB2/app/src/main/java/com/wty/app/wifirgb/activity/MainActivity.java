@@ -8,9 +8,12 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wcolorpicker.android.IOnColorChangeListener;
+import com.wcolorpicker.android.IOnColorSelectedListener;
 import com.wcolorpicker.android.WCircleColorPicker;
 import com.wty.app.wifirgb.R;
 import com.wty.app.wifirgb.bluetooth.BluetoothChatService;
@@ -20,9 +23,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-public class MainActivity extends AppCompatActivity implements IOnColorChangeListener{
+public class MainActivity extends AppCompatActivity implements IOnColorChangeListener,IOnColorSelectedListener{
 
     WCircleColorPicker colorPicker;
+    TextView tv_color;
+    View view_color;
     private Handler handler;
     private sendThread sendThread;
     private String sendMessage = "";
@@ -34,6 +39,9 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         handler = new Handler();
         colorPicker = (WCircleColorPicker) findViewById(R.id.color_picker);
         colorPicker.setOnColorChangedListener(this);
+        colorPicker.setOnColorSelectedListener(this);
+        view_color = findViewById(R.id.color_view);
+        tv_color = (TextView) findViewById(R.id.color_tv);
         if(sendThread == null){
             sendThread = new sendThread();
         }
@@ -67,9 +75,15 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
 
     @Override
     public void onColorSelected(int red, int green, int blue) {
+        tv_color.setText("R:"+red+",G:"+green+",B:"+blue);
         getSendMessage(red,green,blue);
         handler.removeCallbacks(sendThread);
         handler.postDelayed(sendThread, 300);
+    }
+
+    @Override
+    public void onColorSelected(int newColor, int oldColor) {
+        view_color.setBackgroundColor(newColor);
     }
 
     public static void startMainActivity(Context context){
