@@ -77,9 +77,9 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
     public void onColorSelected(int red, int green, int blue) {
         tv_color.setText("R:"+red+",G:"+green+",B:"+blue);
         getSendMessage(red,green,blue);
-//        handler.removeCallbacks(sendThread);
-        sendMessage(sendMessage);
-//        handler.postDelayed(sendThread, 0);
+        handler.removeCallbacks(sendThread);
+//        sendMessage(sendMessage);
+        handler.postDelayed(sendThread, 10);
     }
 
     @Override
