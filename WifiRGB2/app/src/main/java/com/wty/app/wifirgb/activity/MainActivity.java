@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         getSendMessage(red,green,blue);
         handler.removeCallbacks(sendThread);
 //        sendMessage(sendMessage);
-        handler.postDelayed(sendThread, 10);
+        handler.postDelayed(sendThread, 5);
     }
 
     @Override

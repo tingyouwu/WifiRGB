@@ -178,7 +178,7 @@ public class WCircleColorPicker extends View {
                     int green = getGreen(newColor);
                     int blue = getBlue(newColor);
 
-                    if(Math.abs(red - old_red)<=2 && Math.abs(green-old_green)<=2 && Math.abs(blue-old_blue)<=2)return true;
+                    if(Math.abs(red - old_red)<=3 && Math.abs(green-old_green)<=3 && Math.abs(blue-old_blue)<=3)return true;
 
                     old_red = red;
                     old_blue =blue;
