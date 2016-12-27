@@ -78,8 +78,8 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         tv_color.setText("R:"+red+",G:"+green+",B:"+blue);
         getSendMessage(red,green,blue);
         handler.removeCallbacks(sendThread);
-//        sendMessage(sendMessage);
-        handler.postDelayed(sendThread, 15);
+        sendMessage(sendMessage);
+//        handler.postDelayed(sendThread, 15);
     }
 
     @Override
@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         // Check that we're actually connected before trying anything
         if (BluetoothChatService.getInstance().getState() != BluetoothChatService.STATE_CONNECTED) {
             Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
+            finish();
             return;
         }
         // Check that there's actually something to send
