@@ -59,8 +59,6 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         switch (event.getType()){
             case BluetoothChatService.MESSAGE_WRITE:
                 byte[] writeBuf = (byte[])(event.getHashMap().get(BluetoothChatService.DATA));
-                String writeMessage = new String(writeBuf);
-                Log.d("wty","result="+writeMessage);
                 break;
             case BluetoothChatService.MESSAGE_TOAST:
                 Toast.makeText(getApplicationContext(), event.getHashMap().get(BluetoothChatService.TOAST).toString(),
@@ -78,8 +76,8 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         tv_color.setText("R:"+red+",G:"+green+",B:"+blue);
         getSendMessage(red,green,blue);
         handler.removeCallbacks(sendThread);
-        sendMessage(sendMessage);
-//        handler.postDelayed(sendThread, 15);
+//        sendMessage(sendMessage);
+        handler.postDelayed(sendThread, 10);
     }
 
     @Override
@@ -120,11 +118,11 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         // Check that we're actually connected before trying anything
         if (BluetoothChatService.getInstance().getState() != BluetoothChatService.STATE_CONNECTED) {
             Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
-            finish();
             return;
         }
         // Check that there's actually something to send
         if (message.length() > 0) {
+            Log.d("_RGB_",sendMessage);
             byte[] send = message.getBytes();
             BluetoothChatService.getInstance().write(send);
         }

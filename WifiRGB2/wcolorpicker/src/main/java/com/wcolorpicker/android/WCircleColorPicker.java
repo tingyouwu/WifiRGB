@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -30,6 +31,8 @@ public class WCircleColorPicker extends View {
 
     private Rect rect;
     private Bitmap bitmap;
+
+    private int old_red,old_green,old_blue;
 
     private Paint mCirclePaint = new Paint();
 
@@ -162,9 +165,8 @@ public class WCircleColorPicker extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int action = event.getActionMasked();
+        int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
-
             if(!isOutOfCircle((int) event.getX(),(int) event.getY())){
                 int newColor = getColorForPoint((int) event.getX(), (int) event.getY(), colorHsv);
                 if (mOnColorSelectedListener != null) {
@@ -175,6 +177,13 @@ public class WCircleColorPicker extends View {
                     int red = getRed(newColor);
                     int green = getGreen(newColor);
                     int blue = getBlue(newColor);
+
+                    if(Math.abs(red - old_red)<=2 && Math.abs(green-old_green)<=2 && Math.abs(blue-old_blue)<=2)return true;
+
+                    old_red = red;
+                    old_blue =blue;
+                    old_green = green;
+
                     mOnColorChangeListener.onColorSelected(red,green,blue);
                 }
                 lastSelectedColor = newColor;
