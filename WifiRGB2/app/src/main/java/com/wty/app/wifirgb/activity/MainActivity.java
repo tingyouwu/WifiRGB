@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,14 +24,22 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-public class MainActivity extends AppCompatActivity implements IOnColorChangeListener,IOnColorSelectedListener{
+public class MainActivity extends AppCompatActivity implements IOnColorChangeListener,IOnColorSelectedListener,View.OnClickListener{
 
     WCircleColorPicker colorPicker;
     TextView tv_color;
     View view_color;
+    Button btn_on;//led亮
+    Button btn_off;//led灭
+    Button btn_add;//led闪烁+
+    Button btn_delete;//led闪烁减
+    Button btn_light_add;//亮度+
+    Button btn_light_delete;//亮度-
     private Handler handler;
     private sendThread sendThread;
     private String sendMessage = "";
+    private int frequency = 5;//闪烁频率
+    private int light = 5;//亮度
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +47,18 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         setContentView(R.layout.activity_main);
         handler = new Handler();
         colorPicker = (WCircleColorPicker) findViewById(R.id.color_picker);
+        btn_on = (Button) findViewById(R.id.btn_on);
+        btn_off = (Button) findViewById(R.id.btn_off);
+        btn_add = (Button) findViewById(R.id.btn_add);
+        btn_delete = (Button) findViewById(R.id.btn_delete);
+        btn_light_add = (Button) findViewById(R.id.btn_light_add);
+        btn_light_delete = (Button) findViewById(R.id.btn_light_delete);
+        btn_on.setOnClickListener(this);
+        btn_off.setOnClickListener(this);
+        btn_add.setOnClickListener(this);
+        btn_delete.setOnClickListener(this);
+        btn_light_add.setOnClickListener(this);
+        btn_light_delete.setOnClickListener(this);
         colorPicker.setOnColorChangedListener(this);
         colorPicker.setOnColorSelectedListener(this);
         view_color = findViewById(R.id.color_view);
@@ -122,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         }
         // Check that there's actually something to send
         if (message.length() > 0) {
-            Log.d("_RGB_",sendMessage);
+            Log.d("_RGB_",message);
             byte[] send = message.getBytes();
             BluetoothChatService.getInstance().write(send);
         }
@@ -141,6 +162,36 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         sb.append("+C,").append(""+rgbString.toString().length()).append(":").append(rgbString.toString()).append(";");
         Log.d("wty","data:"+sb.toString());
         sendMessage = sb.toString();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_on:
+                //数据格式: 1;
+                sendMessage("1");
+                break;
+            case R.id.btn_off:
+                //数据格式: 0;
+                sendMessage("0");
+                break;
+            case R.id.btn_add:
+                //数据格式：F
+                sendMessage("F");
+                break;
+            case R.id.btn_delete:
+                //数据格式：G
+                sendMessage("G");
+                break;
+            case R.id.btn_light_add:
+                //数据格式:L
+                sendMessage("L");
+                break;
+            case R.id.btn_light_delete:
+                //数据格式:M
+                sendMessage("M");
+                break;
+        }
     }
 
     private class sendThread implements Runnable {
