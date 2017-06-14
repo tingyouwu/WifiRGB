@@ -1,19 +1,21 @@
 package com.wty.app.wifirgb.activity;
 
+import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.tbruyelle.rxpermissions.RxPermissions;
 import com.wty.app.wifirgb.R;
 import com.wty.app.wifirgb.bluetooth.BluetoothChatService;
 import com.wty.app.wifirgb.bluetooth.DeviceListActivity;
@@ -26,6 +28,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import rx.functions.Action1;
+
 /**
  * @Desc 连接蓝牙台灯页面
  * @author wty
@@ -36,6 +40,8 @@ public class LoginActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 2;
 
     Button btn_connect;
+    Button about;
+    private BluetoothAdapter mBluetoothAdapter = null;
 
     public static void startLoginActivity(Context context){
         Intent intent = new Intent(context, LoginActivity.class);
@@ -47,25 +53,50 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         btn_connect = (Button) findViewById(R.id.btn_connect);
+        about = (Button) findViewById(R.id.about);
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            Toast.makeText(this, "手机无蓝牙设备", Toast.LENGTH_SHORT).show();
+        }else{
+            if(!mBluetoothAdapter.isEnabled()){
+                if (Build.VERSION.SDK_INT >= 23) {
+                    RxPermissions.getInstance(LoginActivity.this)
+                            .request(Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION)
+                            .subscribe(new Action1<Boolean>() {
+                                @Override
+                                public void call(Boolean aBoolean) {
+                                    if (aBoolean) {
+                                        Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                                        startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
+                                    }
+                                }
+                            });
+                } else {
+                    Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
+                }
+            }
+        }
         btn_connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mBluetoothAdapter == null) {
+                    Toast.makeText(LoginActivity.this, "手机无蓝牙设备", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Intent serverIntent = new Intent(LoginActivity.this, DeviceListActivity.class);
                 startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
             }
         });
 
-        if (BluetoothAdapter.getDefaultAdapter() == null) {
-            Toast.makeText(this, "手机无蓝牙设备", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }else{
-            if(!BluetoothAdapter.getDefaultAdapter().isEnabled()){
-                Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
+        about.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this,AboutActivity.class);
+                startActivity(intent);
             }
-        }
-
+        });
         EventBus.getDefault().register(this);
     }
 
@@ -108,6 +139,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){
+            mBluetoothAdapter.disable();
+        }
         EventBus.getDefault().unregister(this);
     }
 
@@ -165,8 +199,6 @@ public class LoginActivity extends AppCompatActivity {
             }, 2000); // 如果2秒钟内没有按下返回键，则启动定时器取消掉刚才执行的任务
 
         } else {
-            if(BluetoothAdapter.getDefaultAdapter().isEnabled())
-                BluetoothAdapter.getDefaultAdapter().disable();
             BluetoothChatService.getInstance().stop();
             finish();
         }

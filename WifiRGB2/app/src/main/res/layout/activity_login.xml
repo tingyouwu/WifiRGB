@@ -5,18 +5,40 @@
     android:layout_height="match_parent"
     android:background="@mipmap/login_backgroud">
 
-    <Button
-        android:id="@+id/btn_connect"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:background="@drawable/login_press"
-        android:gravity="center"
-        android:padding="8dp"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:text="  连接蓝牙台灯  "
-        android:textColor="@color/white"
-        android:layout_marginBottom="10dp"
-        android:textSize="16sp" />
+        android:layout_margin="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_connect"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:background="@drawable/login_press"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="  连接彩灯  "
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/about"
+            android:layout_marginLeft="40dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:background="@drawable/login_press"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="  关于我们  "
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+
 
 </RelativeLayout>
