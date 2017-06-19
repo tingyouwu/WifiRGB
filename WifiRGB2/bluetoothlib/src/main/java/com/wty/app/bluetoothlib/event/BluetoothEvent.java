@@ -1,4 +1,4 @@
-package com.wty.app.wifirgb.event;
+package com.wty.app.bluetoothlib.event;
 
 import java.util.HashMap;
 

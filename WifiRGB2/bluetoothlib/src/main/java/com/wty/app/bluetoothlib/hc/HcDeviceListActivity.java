@@ -1,4 +1,4 @@
-package com.wty.app.wifirgb.bluetooth;
+package com.wty.app.bluetoothlib.hc;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -18,12 +18,11 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-
-import com.wty.app.wifirgb.R;
+import com.wty.app.bluetoothlib.R;
 
 import java.util.Set;
 
-public class DeviceListActivity extends Activity {
+public class HcDeviceListActivity extends Activity {
 	public static String EXTRA_DEVICE_ADDRESS = "device_address";
 
 	private BluetoothAdapter mBtAdapter;

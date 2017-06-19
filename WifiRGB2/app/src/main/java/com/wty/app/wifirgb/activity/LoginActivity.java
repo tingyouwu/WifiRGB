@@ -15,11 +15,10 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.tbruyelle.rxpermissions.RxPermissions;
+import com.wty.app.bluetoothlib.event.BluetoothEvent;
+import com.wty.app.bluetoothlib.hc.HcDeviceListActivity;
+import com.wty.app.bluetoothlib.hc.HcBluetoothService;
 import com.wty.app.wifirgb.R;
-import com.wty.app.wifirgb.bluetooth.BluetoothChatService;
-import com.wty.app.wifirgb.bluetooth.DeviceListActivity;
-import com.wty.app.wifirgb.event.BluetoothEvent;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -84,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "手机无蓝牙设备", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Intent serverIntent = new Intent(LoginActivity.this, DeviceListActivity.class);
+                Intent serverIntent = new Intent(LoginActivity.this, HcDeviceListActivity.class);
                 startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
             }
         });
@@ -102,31 +101,31 @@ public class LoginActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(BluetoothEvent event){
         switch (event.getType()){
-            case BluetoothChatService.MESSAGE_STATE_CHANGE:
-                switch ((int)(event.getHashMap().get(BluetoothChatService.STATE))){
-                    case BluetoothChatService.STATE_CONNECTED:
+            case HcBluetoothService.MESSAGE_STATE_CHANGE:
+                switch ((int)(event.getHashMap().get(HcBluetoothService.STATE))){
+                    case HcBluetoothService.STATE_CONNECTED:
                         break;
-                    case BluetoothChatService.STATE_CONNECTING:
+                    case HcBluetoothService.STATE_CONNECTING:
                         Toast.makeText(getApplicationContext(), "正在连接该蓝牙台灯", Toast.LENGTH_SHORT).show();
                         break;
-                    case BluetoothChatService.STATE_LISTEN:
+                    case HcBluetoothService.STATE_LISTEN:
                         break;
-                    case BluetoothChatService.STATE_NONE:
+                    case HcBluetoothService.STATE_NONE:
                         break;
                     default:
                         break;
                 }
                 break;
-            case BluetoothChatService.MESSAGE_DEVICE_NAME:
-                String mConnectedDeviceName = event.getHashMap().get(BluetoothChatService.DEVICE_NAME).toString();
+            case HcBluetoothService.MESSAGE_DEVICE_NAME:
+                String mConnectedDeviceName = event.getHashMap().get(HcBluetoothService.DEVICE_NAME).toString();
                 Toast.makeText(getApplicationContext(), "连接上 "
                         + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
                 MainActivity.startMainActivity(LoginActivity.this);
                 finish();
                 break;
 
-            case BluetoothChatService.MESSAGE_TOAST:
-                Toast.makeText(getApplicationContext(), event.getHashMap().get(BluetoothChatService.TOAST).toString(),
+            case HcBluetoothService.MESSAGE_TOAST:
+                Toast.makeText(getApplicationContext(), event.getHashMap().get(HcBluetoothService.TOAST).toString(),
                         Toast.LENGTH_SHORT).show();
                 break;
 
@@ -160,9 +159,9 @@ public class LoginActivity extends AppCompatActivity {
             case REQUEST_CONNECT_DEVICE:
                 if (resultCode == Activity.RESULT_OK) {
                     String address = data.getExtras()
-                            .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+                            .getString(HcDeviceListActivity.EXTRA_DEVICE_ADDRESS);
                     BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
-                    BluetoothChatService.getInstance().connect(device);
+                    HcBluetoothService.getInstance().connect(device);
                 }
                 break;
 
@@ -198,7 +197,7 @@ public class LoginActivity extends AppCompatActivity {
             if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){
                 mBluetoothAdapter.disable();
             }
-            BluetoothChatService.getInstance().stop();
+            HcBluetoothService.getInstance().stop();
             finish();
         }
     }

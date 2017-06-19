@@ -15,10 +15,9 @@ import android.widget.Toast;
 import com.wcolorpicker.android.IOnColorChangeListener;
 import com.wcolorpicker.android.IOnColorSelectedListener;
 import com.wcolorpicker.android.WCircleColorPicker;
+import com.wty.app.bluetoothlib.event.BluetoothEvent;
+import com.wty.app.bluetoothlib.hc.HcBluetoothService;
 import com.wty.app.wifirgb.R;
-import com.wty.app.wifirgb.bluetooth.BluetoothChatService;
-import com.wty.app.wifirgb.event.BluetoothEvent;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -61,14 +60,14 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(BluetoothEvent event){
         switch (event.getType()){
-            case BluetoothChatService.MESSAGE_WRITE:
-                byte[] writeBuf = (byte[])(event.getHashMap().get(BluetoothChatService.DATA));
+            case HcBluetoothService.MESSAGE_WRITE:
+                byte[] writeBuf = (byte[])(event.getHashMap().get(HcBluetoothService.DATA));
                 break;
-            case BluetoothChatService.MESSAGE_TOAST:
-                Toast.makeText(getApplicationContext(), event.getHashMap().get(BluetoothChatService.TOAST).toString(),
+            case HcBluetoothService.MESSAGE_TOAST:
+                Toast.makeText(getApplicationContext(), event.getHashMap().get(HcBluetoothService.TOAST).toString(),
                         Toast.LENGTH_SHORT).show();
                 break;
-            case BluetoothChatService.MESSAGE_READ:
+            case HcBluetoothService.MESSAGE_READ:
                 break;
             default:
                 break;
@@ -98,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         super.onKeyDown(keyCode, event);
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                if (BluetoothChatService.getInstance().getState() != BluetoothChatService.STATE_CONNECTED) {
+                if (HcBluetoothService.getInstance().getState() != HcBluetoothService.STATE_CONNECTED) {
                     LoginActivity.startLoginActivity(MainActivity.this);
                 }else {
                     //关闭蓝牙
@@ -123,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
             return;
         }
 
-        if (BluetoothChatService.getInstance().getState() != BluetoothChatService.STATE_CONNECTED) {
+        if (HcBluetoothService.getInstance().getState() != HcBluetoothService.STATE_CONNECTED) {
             Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -131,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements IOnColorChangeLis
         if (message.length() > 0) {
             Log.d("_RGB_",message);
             byte[] send = message.getBytes();
-            BluetoothChatService.getInstance().write(send);
+            HcBluetoothService.getInstance().write(send);
         }
     }
 

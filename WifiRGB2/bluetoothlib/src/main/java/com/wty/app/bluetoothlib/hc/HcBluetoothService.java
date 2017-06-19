@@ -1,4 +1,4 @@
-package com.wty.app.wifirgb.bluetooth;
+package com.wty.app.bluetoothlib.hc;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -6,7 +6,7 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.wty.app.wifirgb.event.BluetoothEvent;
+import com.wty.app.bluetoothlib.event.BluetoothEvent;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -21,8 +21,8 @@ import java.util.UUID;
  * incoming connections, a thread for connecting with a device, and a
  * thread for performing data transmissions when connected.
  */
-public class BluetoothChatService {
-    private static final String TAG = "BluetoothChatService";
+public class HcBluetoothService {
+    private static final String TAG = "HcBluetoothService";
     private static final boolean D = true;
     private static final String NAME = "PhoneGame";
 
@@ -49,13 +49,13 @@ public class BluetoothChatService {
     public static final String STATE = "state";
     public static final String DATA = "data";
 
-    private static volatile BluetoothChatService instance = new BluetoothChatService();
+    private static volatile HcBluetoothService instance = new HcBluetoothService();
 
-    public static BluetoothChatService getInstance(){
+    public static HcBluetoothService getInstance(){
         return instance;
     }
 
-    private BluetoothChatService() {
+    private HcBluetoothService() {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
     }
@@ -217,7 +217,7 @@ public class BluetoothChatService {
 
                 // If a connection was accepted
                 if (socket != null) {
-                    synchronized (BluetoothChatService.this) {
+                    synchronized (HcBluetoothService.this) {
                         switch (mState) {
                         case STATE_LISTEN:
                         case STATE_CONNECTING:
@@ -293,12 +293,12 @@ public class BluetoothChatService {
                     Log.e(TAG, "unable to close() socket during connection failure", e2);
                 }
                 // Start the service over to restart listening mode
-                BluetoothChatService.this.start();
+                HcBluetoothService.this.start();
                 return;
             }
 
             // Reset the ConnectThread because we're done
-            synchronized (BluetoothChatService.this) {
+            synchronized (HcBluetoothService.this) {
                 mConnectThread = null;
             }
 
