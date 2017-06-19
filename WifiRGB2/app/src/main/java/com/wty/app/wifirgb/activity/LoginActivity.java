@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -139,9 +138,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){
-            mBluetoothAdapter.disable();
-        }
         EventBus.getDefault().unregister(this);
     }
 
@@ -199,6 +195,9 @@ public class LoginActivity extends AppCompatActivity {
             }, 2000); // 如果2秒钟内没有按下返回键，则启动定时器取消掉刚才执行的任务
 
         } else {
+            if(mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()){
+                mBluetoothAdapter.disable();
+            }
             BluetoothChatService.getInstance().stop();
             finish();
         }
