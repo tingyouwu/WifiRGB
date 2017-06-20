@@ -12,11 +12,12 @@
 
     <!--  HcDeviceListActivity -->
     <string name="scanning">搜索中...</string>
-    <string name="select_device">选择一个已配对设备进行连接</string>
+    <string name="select_device">选择一个设备进行连接</string>
     <string name="none_paired">没有已配对设备</string>
     <string name="none_found">没有找到设备</string>
     <string name="title_paired_devices">已配对设备</string>
     <string name="title_other_devices">其他可用设备</string>
+    <string name="title_ble_devices">ble设备</string>
     <string name="button_scan">搜索蓝牙设备</string>
     <string name="paddingleft">20dp</string>
 

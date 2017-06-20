@@ -20,6 +20,13 @@
             android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.MinWidth"
             android:configChanges="orientation|keyboardHidden" />
 
+        <activity
+            android:name=".ble.BleDeviceListActivity"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.MinWidth"
+            android:configChanges="orientation|keyboardHidden" />
+
+        <service android:name=".ble.BleBluetoothService" />
+
     </application>
 
 </manifest>

@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.tbruyelle.rxpermissions.RxPermissions;
+import com.wty.app.bluetoothlib.ble.BleDeviceListActivity;
+import com.wty.app.bluetoothlib.ble.adapter.BleDeviceListAdapter;
 import com.wty.app.bluetoothlib.event.BluetoothEvent;
 import com.wty.app.bluetoothlib.hc.HcDeviceListActivity;
 import com.wty.app.bluetoothlib.hc.HcBluetoothService;
@@ -83,8 +85,11 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "手机无蓝牙设备", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Intent serverIntent = new Intent(LoginActivity.this, HcDeviceListActivity.class);
-                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+//                Intent serverIntent = new Intent(LoginActivity.this, HcDeviceListActivity.class);
+//                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+
+                Intent serverIntent = new Intent(LoginActivity.this, BleDeviceListActivity.class);
+                startActivity(serverIntent);
             }
         });
 
