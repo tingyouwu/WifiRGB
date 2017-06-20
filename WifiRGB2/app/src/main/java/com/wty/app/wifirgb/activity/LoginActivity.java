@@ -101,6 +101,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
         EventBus.getDefault().register(this);
+
+
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

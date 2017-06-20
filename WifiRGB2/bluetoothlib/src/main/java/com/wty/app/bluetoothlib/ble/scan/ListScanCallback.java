@@ -1,6 +1,8 @@
 package com.wty.app.bluetoothlib.ble.scan;
 
 import android.bluetooth.BluetoothDevice;
+import android.text.TextUtils;
+import android.util.Log;
 
 
 import com.wty.app.bluetoothlib.ble.data.ScanResult;
@@ -28,6 +30,10 @@ public abstract class ListScanCallback extends PeriodScanCallback {
 
         ScanResult scanResult = new ScanResult(device, rssi, scanRecord,
                 System.currentTimeMillis());
+
+        if(!TextUtils.isEmpty(device.getName())){
+            Log.d("wty", device.getName());
+        }
 
         synchronized (this) {
             hasFound.set(false);
